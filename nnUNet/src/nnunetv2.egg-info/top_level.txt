@@ -1,3 +1,0 @@
-post
-rename_seg
-run_pre_seg
