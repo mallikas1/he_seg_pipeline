@@ -1,3 +1,9 @@
+# AFTER THE DATA HAS BEEN FORMATED TO NNUNET FORMAT.
+# run_pre_seg.py should do that provided all the paths have been changed
+# more details can be found on the og nnunet git. 
+
+
+
 # export the nnUNet environment variables
 export nnUNet_raw="/home/fm/Documents/he_seg_pipeline/nnUNet/nnUNet_raw"
 export nnUNet_preprocessed="/home/fm/Documents/he_seg_pipeline/nnUNet/nnUNet_raw/nnUNet_preprocessed"
@@ -11,7 +17,9 @@ python -c "import nnunetv2; print(nnunetv2.__file__)"
 
 
 # id 951 -- is the number i gave to the dataset
+
 # preprocess the data and create the dataset json file
+
 nnUNetv2_plan_and_preprocess -d 951 --verify_dataset_integrity -c 2d
 
 
@@ -21,27 +29,27 @@ wandb login <XYZ>
 
 # export WANDB_PROJECT="vagus-nnunet-baseline"
 # # optional:
-# export WANDB_ENTITY="mallikafnu-cwru"
+# export WANDB_ENTITY="xyz"
 # export WANDB_MODE="online"   # or"offline"
 
 
 # # runs with different name for wandb
+
+# regular 
 WANDB_RUN_NAME="dataset_bound-2d-fold1" \
 WANDB_GROUP="dataset_baseline" \
 CUDA_VISIBLE_DEVICES=1 nnUNetv2_train 951 2d 1 -tr nnUNetTrainerWandB_loss
 
-
+# Topo loss
 WANDB_RUN_NAME="dataset_topo-2d-fold2" \
 WANDB_GROUP="dataset_topo" \
 CUDA_VISIBLE_DEVICES=0 nnUNetv2_train 951 2d 2 -tr nnUNetTrainerWandB_Topoloss
 
 
 # testing 
-nnUNetv2_predict -i INPUT_FOLDER -o OUTPUT_FOLDER -d DATASET_NAME_OR_ID -c CONFIGURATION --save_probabilities
+nnUNetv2_predict -i INPUT_FOLDER -o OUTPUT_FOLDER -d DATASET_NAME_OR_ID -c CONFIGURATION --save_probabilities -tr nnUNetTrainerWandB_Topoloss
 
-
-CUDA_VISIBLE_DEVICES=0 nnUNetv2_predict \
-    -i /home/fm/Documents/test_sr028 \
-    -o /home/fm/Documents/test_sr028_Topo -d 951 -c 2d -f 0 1 2 3 4 -tr nnUNetTrainerWandB_Topoloss
-
-
+'''
+you have the option of running analysis on downsampled images as long as the resolution per pixel is changed to 0.688
+or you resample the images to og resolution of 0.172
+'''
